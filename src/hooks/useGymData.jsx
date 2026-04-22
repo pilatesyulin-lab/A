@@ -38,12 +38,11 @@ export const useGymData = () => {
           }))
           .filter((gym) => gym.name !== "이름 없음" && gym.name !== "상호명");
 
-        console.log("최종 데이터 개수:", combinedData.length);
         setGyms(combinedData);
         setLoading(false);
       })
       .catch((err) => {
-        console.error("데이터 병합 중 에러:", err);
+        console.error("데이터 합치기 실패:", err);
         setLoading(false);
       });
   }, []);

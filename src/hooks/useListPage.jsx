@@ -6,19 +6,19 @@ import GymItem from "../GymItem";
 const GymListPage = ({ gyms }) => {
   const navigate = useNavigate();
 
-  // 훅에서 필터 관련 상태들을 가져옵니다.
+  // 👈 수정 1: = useListPage(gyms); 가 반드시 붙어야 합니다!
   const {
     inputText,
     setInputText,
     filteredGyms,
     sortType,
-    selectedRegion, // 지역 상태
+    selectedRegion,
     setSearchParams,
     setPage,
     hasMore,
   } = useListPage(gyms);
 
-  // 필터나 정렬이 바뀔 때 URL을 업데이트하는 함수
+  // 👈 수정 2: 아까는 여기서 중괄호(})가 닫혔었는데, 그러면 안 됩니다.
   const updateParams = (newParams) => {
     setSearchParams({
       search: inputText,
@@ -34,7 +34,6 @@ const GymListPage = ({ gyms }) => {
         📍 헬스장 찾기
       </h2>
 
-      {/* 검색 바 */}
       <div style={{ marginBottom: "15px" }}>
         <input
           type="text"
@@ -51,16 +50,7 @@ const GymListPage = ({ gyms }) => {
         />
       </div>
 
-      {/* 필터 및 정렬 영역 (여기에서 지역을 선택합니다) */}
-      <div
-        style={{
-          marginBottom: "15px",
-          display: "flex",
-          justifyContent: "space-between",
-          gap: "10px",
-        }}
-      >
-        {/* 지역 필터 추가 (용산구, 성동구 등) */}
+      <div style={{ marginBottom: "15px", display: "flex", gap: "10px" }}>
         <select
           value={selectedRegion}
           onChange={(e) => updateParams({ region: e.target.value })}
@@ -71,7 +61,6 @@ const GymListPage = ({ gyms }) => {
           <option value="성동구">성동구</option>
         </select>
 
-        {/* 정렬 필터 */}
         <select
           value={sortType}
           onChange={(e) => updateParams({ sort: e.target.value })}
@@ -82,9 +71,8 @@ const GymListPage = ({ gyms }) => {
         </select>
       </div>
 
-      {/* 리스트 출력 */}
       <div style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
-        {filteredGyms.length > 0 ? (
+        {filteredGyms && filteredGyms.length > 0 ? (
           filteredGyms.map((gym) => (
             <div
               key={gym.id}
@@ -101,7 +89,6 @@ const GymListPage = ({ gyms }) => {
         )}
       </div>
 
-      {/* 더 보기 버튼 */}
       {hasMore && (
         <button
           onClick={() => setPage((prev) => prev + 1)}
@@ -120,6 +107,6 @@ const GymListPage = ({ gyms }) => {
       )}
     </div>
   );
-};
+}; // 👈 여기서 최종적으로 컴포넌트가 끝나야 합니다.
 
 export default GymListPage;

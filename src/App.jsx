@@ -1,7 +1,7 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
 import { useGymData } from "./hooks/useGymData";
-import GymListPage from "./pages/GymListPages";
+import GymListPage from "./pages/GymListPage";
 import GymDetailPage from "./pages/GymDetailPage";
 
 function App() {
