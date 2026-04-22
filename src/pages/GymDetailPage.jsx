@@ -1,45 +1,34 @@
-import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom"; // useParams: ID 가져오기, useNavigate: 뒤로가기
-import Papa from "papaparse";
+import React from "react";
+import { useParams, useNavigate } from "react-router-dom";
 
-const GymDetailPage = () => {
-  const { id } = useParams(); // URL에서 /gym/:id 의 id값을 가져옵니다.
+// 1. App.jsx에서 보내준 'gyms' 배열을 props로 받습니다.
+const GymDetailPage = ({ gyms }) => {
+  const { id } = useParams();
   const navigate = useNavigate();
-  const [gym, setGym] = useState(null);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    // 1. 상세 페이지에서도 데이터를 가져와야 합니다.
-    fetch("/gym_data.csv")
-      .then((response) => response.arrayBuffer())
-      .then((buffer) => {
-        const decoder = new TextDecoder("euc-kr");
-        const decodedText = decoder.decode(buffer);
+  // 2. 전체 gyms 데이터 중에서 현재 URL의 id와 일치하는 데이터 하나만 찾습니다.
+  // 이 작업은 App에서 이루어지므로 fetch보다 훨씬 빠름.
+  const gym = gyms.find((item) => item.id === id);
 
-        Papa.parse(decodedText, {
-          header: false,
-          skipEmptyLines: true,
-          complete: (results) => {
-            const realData = results.data.slice(1);
-            const allGyms = realData.map((row, index) => ({
-              id: String(index + 1), // 비교를 위해 문자열로 저장
-              name: row[1] ? String(row[1]).trim() : "이름 없음",
-              address: row[2] ? String(row[2]).trim() : "주소 없음",
-              phone: row[3] ? String(row[3]).trim() : "번호 정보 없음", // 엑셀에 번호가 있다면 추가
-            }));
+  // 만약 데이터를 찾지 못했을 경우 (잘못된 접근 등)
+  if (!gym) {
+    return (
+      <div style={{ padding: "20px" }}>
+        <button onClick={() => navigate("/")}>목록으로 돌아가기</button>
+        <p>정보를 찾을 수 없습니다.</p>
+      </div>
+    );
+  }
 
-            // 2. 전체 데이터 중 현재 URL의 id와 일치하는 것만 찾습니다.
-            const selectedGym = allGyms.find((item) => item.id === id);
-            setGym(selectedGym);
-            setLoading(false);
-          },
-        });
-      });
-  }, [id]);
+  // 3. 주소 정제 로직 (시/구 까지만 잘라내기)
+  const getShortAddress = (addr) => {
+    if (!addr) return "";
+    const addrParts = addr.split(" ");
+    return addrParts.slice(0, 2).join(" ");
+  };
 
-  if (loading) return <div style={{ padding: "20px" }}>로딩 중...</div>;
-  if (!gym)
-    return <div style={{ padding: "20px" }}>정보를 찾을 수 없습니다.</div>;
+  const searchTerm = `${getShortAddress(gym.address)} ${gym.name}`;
+  const naverSearchUrl = `https://search.naver.com/search.naver?query=${encodeURIComponent(searchTerm)}`;
 
   return (
     <div
@@ -50,10 +39,16 @@ const GymDetailPage = () => {
         lineHeight: "1.6",
       }}
     >
-      {/* 뒤로가기 버튼 */}
       <button
         onClick={() => navigate(-1)}
-        style={{ marginBottom: "20px", cursor: "pointer", padding: "5px 10px" }}
+        style={{
+          marginBottom: "20px",
+          cursor: "pointer",
+          padding: "8px 15px",
+          border: "1px solid #ccc",
+          borderRadius: "5px",
+          backgroundColor: "#fff",
+        }}
       >
         ← 뒤로가기
       </button>
@@ -62,21 +57,43 @@ const GymDetailPage = () => {
         style={{
           border: "1px solid #ddd",
           borderRadius: "12px",
-          padding: "20px",
+          padding: "24px",
           backgroundColor: "#f9f9f9",
         }}
       >
         <h1 style={{ color: "#333", fontSize: "24px", marginBottom: "10px" }}>
           {gym.name}
         </h1>
-        <hr style={{ border: "0.5px solid #eee", marginBottom: "20px" }} />
+        <hr
+          style={{
+            border: "0",
+            borderTop: "1px solid #eee",
+            marginBottom: "20px",
+          }}
+        />
 
         <p>
           <strong>📍 주소:</strong> {gym.address}
         </p>
-        <p>
-          <strong>📞 전화번호:</strong> {gym.phone}
-        </p>
+
+        <a
+          href={naverSearchUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            display: "block",
+            marginTop: "20px",
+            padding: "15px",
+            textAlign: "center",
+            backgroundColor: "#03C75A",
+            color: "#fff",
+            textDecoration: "none",
+            borderRadius: "8px",
+            fontWeight: "bold",
+          }}
+        >
+          네이버 상세 정보 확인하기
+        </a>
 
         <div
           style={{
@@ -84,10 +101,16 @@ const GymDetailPage = () => {
             padding: "15px",
             backgroundColor: "#e7f3ff",
             borderRadius: "8px",
+            border: "1px dashed #007bff",
           }}
         >
+          <h3
+            style={{ color: "#007bff", fontSize: "16px", marginBottom: "10px" }}
+          >
+            🔥 AI 추천 루틴 (준비 중)
+          </h3>
           <p style={{ margin: 0, fontSize: "14px", color: "#555" }}>
-            ✨ AI 추천 루틴과 커뮤니티 기능은 준비 중입니다!
+            {gym.name}의 기구를 분석한 맞춤형 루틴이 곧 공개됩니다!
           </p>
         </div>
       </div>

@@ -1,16 +1,26 @@
-import { Routes, Route } from "react-router-dom"; // Routes, Route 추가
-import GymListPage from "./pages/GymListPage";
-import GymDetailPage from "./pages/GymDetailPage"; // 상세 페이지 컴포넌트 임포트
+import React from "react";
+import { Routes, Route } from "react-router-dom";
+import { useGymData } from "./hooks/useGymData";
+import GymListPage from "./pages/GymListPages";
+import GymDetailPage from "./pages/GymDetailPage";
 
 function App() {
-  return (
-    <Routes>
-      {/* 메인 목록 페이지 경로 */}
-      <Route path="/" element={<GymListPage />} />
+  const { gyms, loading } = useGymData();
 
-      {/* 상세 페이지 경로 (:id는 헬스장 번호에 따라 변하는 동적 값입니다) */}
-      <Route path="/gym/:id" element={<GymDetailPage />} />
-    </Routes>
+  if (loading)
+    return (
+      <div style={{ padding: "50px", textAlign: "center" }}>
+        🏋️ 데이터 로딩 중...
+      </div>
+    );
+
+  return (
+    <div className="App">
+      <Routes>
+        <Route path="/" element={<GymListPage gyms={gyms} />} />
+        <Route path="/gym/:id" element={<GymDetailPage gyms={gyms} />} />
+      </Routes>
+    </div>
   );
 }
 
